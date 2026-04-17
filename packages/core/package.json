@@ -1,0 +1,27 @@
+{
+    "name": "@pap/core",
+    "version": "0.1.0",
+    "type": "module",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": "./dist/index.js",
+        "./db": "./dist/db/index.js",
+        "./types": "./dist/types/index.js"
+    },
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc --watch"
+    },
+    "dependencies": {
+        "@fastify/error": "^3.4.1",
+        "@pap/config": "workspace:*",
+        "mongoose": "^8.3.2",
+        "fastify": "^4.29.1",
+        "fastify-plugin": "^4.5.1"
+    },
+    "devDependencies": {
+        "tsx": "^4.7.0",
+        "typescript": "^5.3.0"
+    }
+}

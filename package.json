@@ -1,0 +1,46 @@
+{
+    "name": "personal-platform",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "pnpm --filter @pap/server dev",
+        "build": "pnpm -r build",
+        "start": "pnpm --filter @pap/server start",
+        "test": "vitest",
+        "test:ui": "vitest --ui",
+        "lint": "eslint . --ext .ts",
+        "format": "prettier --write .",
+        "create-app": "tsx scripts/create-app.ts",
+        "setup-admin": "node --env-file=.env --import tsx/esm scripts/setup-admin.ts",
+        "db:generate": "pnpm --filter @pap/core db:generate",
+        "db:migrate": "pnpm --filter @pap/core db:migrate",
+        "db:studio": "pnpm --filter @pap/core db:studio"
+    },
+    "devDependencies": {
+        "@pap/auth": "workspace:*",
+        "@pap/config": "workspace:*",
+        "@pap/core": "workspace:*",
+        "@types/node": "^20.11.0",
+        "@typescript-eslint/eslint-plugin": "^7.0.0",
+        "@typescript-eslint/parser": "^7.0.0",
+        "@vitest/ui": "^1.2.0",
+        "eslint": "^8.56.0",
+        "prettier": "^3.2.0",
+        "tsx": "^4.7.0",
+        "typescript": "^5.3.0",
+        "vitest": "^1.2.0"
+    },
+    "engines": {
+        "node": ">=18.0.0",
+        "pnpm": ">=8.0.0"
+    },
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "better-sqlite3"
+        ]
+    },
+    "dependencies": {
+        "mongoose": "^8.23.0"
+    }
+}

@@ -1,0 +1,32 @@
+{
+    "name": "@pap/server",
+    "version": "0.1.0",
+    "type": "module",
+    "scripts": {
+        "dev": "tsx --env-file=../../.env src/index.ts",
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "test": "vitest"
+    },
+    "dependencies": {
+        "@fastify/cors": "^9.0.0",
+        "@fastify/helmet": "^11.0.0",
+        "@fastify/rate-limit": "^9.0.0",
+        "@fastify/swagger": "^8.12.0",
+        "@fastify/swagger-ui": "^2.1.0",
+        "@pap/auth": "workspace:*",
+        "@pap/config": "workspace:*",
+        "@pap/core": "workspace:*",
+        "fastify": "^4.25.0",
+        "glob": "^10.3.10",
+        "pino-pretty": "^10.3.1",
+        "pino-roll": "^4.0.0"
+    },
+    "devDependencies": {
+        "@types/glob": "^8.1.0",
+        "@types/node": "^20.11.0",
+        "tsx": "^4.7.0",
+        "typescript": "^5.3.0",
+        "vitest": "^1.2.0"
+    }
+}

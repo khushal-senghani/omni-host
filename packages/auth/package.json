@@ -1,0 +1,28 @@
+{
+    "name": "@pap/auth",
+    "version": "0.1.0",
+    "type": "module",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": "./dist/index.js",
+        "./plugin": "./dist/plugin.js"
+    },
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc --watch"
+    },
+    "dependencies": {
+        "@fastify/jwt": "^8.0.0",
+        "@pap/config": "workspace:*",
+        "@pap/core": "workspace:*",
+        "bcrypt": "^5.1.1",
+        "fastify": "^4.29.1",
+        "fastify-plugin": "^4.5.1",
+        "nanoid": "^5.0.4"
+    },
+    "devDependencies": {
+        "@types/bcrypt": "^5.0.2",
+        "typescript": "^5.3.0"
+    }
+}
