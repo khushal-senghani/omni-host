@@ -29,32 +29,33 @@ async function createApp(appName: string) {
 
     // Create directory structure
     await fs.mkdir(appDir, { recursive: true });
-    await fs.mkdir(path.join(appDir, 'src', 'routes'), { recursive: true });
-    await fs.mkdir(path.join(appDir, 'src', 'services'), { recursive: true });
-    await fs.mkdir(path.join(appDir, 'src', 'schema'), { recursive: true });
+    await fs.mkdir(path.join(appDir, 'src'), { recursive: true });
+    await fs.mkdir(path.join(appDir, 'tests'), { recursive: true });
 
     // Generate package.json
     const packageJson = {
         name: `@pap/${appName}`,
-        version: '0.1.0',
-        type: 'module',
-        main: './dist/index.js',
-        types: './dist/index.d.ts',
+        version: "0.1.0",
+        type: "module",
+        main: "./dist/index.js",
+        types: "./dist/index.d.ts",
         scripts: {
-            build: 'tsc',
-            dev: 'tsc --watch',
-            test: 'vitest',
+            build: "tsc",
+            dev: "tsc --watch",
+            test: "vitest"
         },
         dependencies: {
-            '@pap/core': 'workspace:*',
-            '@pap/config': 'workspace:*',
-            fastify: '^4.25.0',
-            'fastify-plugin': '^4.5.1',
+            "@pap/core": "workspace:*",
+            "@pap/auth": "workspace:*",
+            "fastify": "^4.29.1",
+            "fastify-plugin": "^4.5.1",
+            "zod": "^3.22.4"
         },
         devDependencies: {
-            typescript: '^5.3.0',
-            vitest: '^1.2.0',
-        },
+            "@pap/testing": "workspace:*",
+            "typescript": "^5.3.0",
+            "vitest": "^1.2.0"
+        }
     };
 
     await fs.writeFile(
@@ -64,7 +65,7 @@ async function createApp(appName: string) {
 
     // Generate tsconfig.json
     const tsconfig = {
-        extends: '../../../tsconfig.base.json',
+        extends: '../../tsconfig.base.json',
         compilerOptions: {
             outDir: './dist',
             rootDir: './src',
@@ -78,96 +79,104 @@ async function createApp(appName: string) {
         JSON.stringify(tsconfig, null, 2)
     );
 
-    // Generate app entry point
-    const appEntry = `import fp from 'fastify-plugin';
+    // Generate env.ts
+    const envTs = `import { z } from 'zod';
+
+export const envSchema = z.object({
+  // Add your app-specific env vars here
+  // Example: MY_APP_API_KEY: z.string().min(1),
+});
+
+export type Env = z.infer<typeof envSchema>;
+`;
+    await fs.writeFile(path.join(appDir, 'src', 'env.ts'), envTs);
+
+    // Generate schema.ts (Mongoose)
+    const schemaTs = `import { Schema, model } from 'mongoose';
+
+export const ExampleModel = model('Example', new Schema({ name: String }));
+`;
+    await fs.writeFile(path.join(appDir, 'src', 'schema.ts'), schemaTs);
+
+    // Generate routes.ts
+    const routesTs = `import type { FastifyInstance } from 'fastify';
+import '@pap/auth';
+
+export async function registerRoutes(fastify: FastifyInstance) {
+  fastify.get('/hello', async () => ({ message: 'Hello from ${appName}!' }));
+}
+`;
+    await fs.writeFile(path.join(appDir, 'src', 'routes.ts'), routesTs);
+
+    // Generate index.ts
+    const displayName = appName.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    const indexTs = `import fp from 'fastify-plugin';
 import type { AppPlugin } from '@pap/core';
+import { envSchema } from './env.js';
+import { registerRoutes } from './routes.js';
 
 const plugin = fp(async (fastify) => {
-  // Example route
-  fastify.get('/hello', async () => ({ message: 'Hello from ${appName}!' }));
-  
-  // Protected route example
-  fastify.get('/protected', {
-    preHandler: [fastify.authenticate],
-  }, async (request) => {
-    return { message: \`Hello \${request.user.email}, this is protected!\` };
-  });
+  await registerRoutes(fastify);
 });
 
 export default {
   name: '${appName}',
   prefix: '/${appName}',
   plugin,
+  env: envSchema,
+  db: false,
   meta: {
-    displayName: '${appName.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}',
-    description: 'Description for ${appName}',
+    displayName: '${displayName}',
+    description: 'Description of ${appName}',
     version: '0.1.0',
-    tags: ['example'],
+    auth: 'jwt',
   },
 } satisfies AppPlugin;
 `;
+    await fs.writeFile(path.join(appDir, 'src', 'index.ts'), indexTs);
 
-    await fs.writeFile(path.join(appDir, 'src', 'index.ts'), appEntry);
+    // Generate test file
+    const testTs = `import { describe, it, expect } from 'vitest';
+import { buildTestApp, mockAuth } from '@pap/testing';
+import plugin from '../src/index.js';
 
-    // Generate example service
-    const exampleService = `export interface ExampleData {
-  id: string;
-  name: string;
-}
-
-export async function getExampleData(id: string): Promise<ExampleData | null> {
-  // Business logic here
-  return null;
-}
-
-export async function createExampleData(data: Omit<ExampleData, 'id'>): Promise<ExampleData> {
-  // Business logic here
-  return { id: '123', ...data };
-}
-`;
-
-    await fs.writeFile(path.join(appDir, 'src', 'services', 'example.ts'), exampleService);
-
-    // Generate example test
-    const exampleTest = `import { describe, it, expect } from 'vitest';
-import { getExampleData, createExampleData } from './example.js';
-
-describe('example service', () => {
-  it('should return null for non-existent data', async () => {
-    const result = await getExampleData('non-existent');
-    expect(result).toBeNull();
+describe('${appName}', () => {
+  it('GET /hello returns greeting', async () => {
+    const app = await buildTestApp(plugin);
+    const res = await app.inject({
+      method: 'GET',
+      url: '/${appName}/hello',
+      headers: mockAuth('test-user'),
+    });
+    
+    expect(res.statusCode).toBe(200);
+    expect(res.json().message).toBeDefined();
   });
 });
 `;
+    await fs.writeFile(path.join(appDir, 'tests', `${appName}.test.ts`), testTs);
 
-    await fs.writeFile(path.join(appDir, 'src', 'services', 'example.test.ts'), exampleTest);
+    // Generate README.md
+    const readmeMd = `# ${displayName}
 
-    // Generate schema example
-    const schemaExample = `import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+**Prefix:** \`/${appName}\`
+**Auth:** \`jwt\`
+**DB:** No
 
-export const exampleTable = sqliteTable('${appName.replace(/-/g, '_')}', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
-});
+## Env vars
+*None required by default. Add to \`src/env.ts\` and \`.env\`.*
+
+## Routes
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| GET | /${appName}/hello | jwt | Health check |
 `;
-
-    await fs.writeFile(path.join(appDir, 'src', 'schema', 'index.ts'), schemaExample);
-
-    // Generate types
-    const typesFile = `export interface ExampleType {
-  id: string;
-  name: string;
-}
-`;
-
-    await fs.writeFile(path.join(appDir, 'src', 'types.ts'), typesFile);
+    await fs.writeFile(path.join(appDir, 'README.md'), readmeMd);
 
     console.log(`✅ App "${appName}" created successfully at apps/${appName}`);
-    console.log('\n📝 Next steps:');
-    console.log(`  1. cd apps/${appName}`);
-    console.log(`  2. pnpm install (from root)`);
+    console.log('\\n📝 Next steps:');
+    console.log(`  1. pnpm install (from root)`);
+    console.log(`  2. cd apps/${appName}`);
     console.log(`  3. Start implementing your app logic`);
     console.log(`  4. Restart the server to see your app: pnpm dev`);
 }

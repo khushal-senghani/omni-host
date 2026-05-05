@@ -11,13 +11,13 @@ export default fp(async (fastify) => {
         sign: { expiresIn: env.ACCESS_TOKEN_EXPIRY },
     });
 
-    fastify.decorate('authenticate', async function (request: any, _reply: any) {
+    const defaultAuthenticate = async function (request: any, _reply: any) {
         try {
             await request.jwtVerify();
         } catch (err) {
             throw new UnauthorizedError('Invalid or expired token');
         }
-    });
+    };
 
     function generateAccessToken(payload: TokenPayload): string {
         return fastify.jwt.sign(payload);
@@ -137,7 +137,7 @@ export default fp(async (fastify) => {
 
     // Logout endpoint
     fastify.post('/auth/logout', {
-        preHandler: [fastify.authenticate],
+        preHandler: [defaultAuthenticate],
     }, async (request) => {
         const refreshToken = request.headers['x-refresh-token'] as string;
         if (refreshToken) {
@@ -148,7 +148,7 @@ export default fp(async (fastify) => {
 
     // Get current user
     fastify.get('/auth/me', {
-        preHandler: [fastify.authenticate],
+        preHandler: [defaultAuthenticate],
     }, async (request) => {
         const user = await User.findById(request.user.id).select('-passwordHash');
         return { user };

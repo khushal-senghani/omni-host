@@ -16,9 +16,10 @@
     "dependencies": {
         "@fastify/error": "^3.4.1",
         "@pap/config": "workspace:*",
-        "mongoose": "^8.3.2",
         "fastify": "^4.29.1",
-        "fastify-plugin": "^4.5.1"
+        "fastify-plugin": "^4.5.1",
+        "mongoose": "^8.3.2",
+        "zod": "^3.25.76"
     },
     "devDependencies": {
         "tsx": "^4.7.0",

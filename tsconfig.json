@@ -5,6 +5,8 @@
         { "path": "./packages/auth" },
         { "path": "./packages/config" },
         { "path": "./packages/core" },
+        { "path": "./packages/logger" },
+        { "path": "./packages/testing" },
         { "path": "./scripts" }
     ]
 }
