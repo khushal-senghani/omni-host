@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const envSchema = z.object({
+export const envSchema = z.object({
     // Server
     PORT: z.string().default('3000'),
     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -46,3 +46,5 @@ export function getEnv(): Env {
 }
 
 export const env = getEnv();
+
+export * from './merge.js';

@@ -75,12 +75,18 @@ importers:
       '@pap/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@pap/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
       fastify:
         specifier: ^4.25.0
         version: 4.29.1
       glob:
         specifier: ^10.3.10
         version: 10.5.0
+      nanoid:
+        specifier: ^5.0.4
+        version: 5.1.7
       pino-pretty:
         specifier: ^10.3.1
         version: 10.3.1
@@ -97,6 +103,34 @@ importers:
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
+      typescript:
+        specifier: ^5.3.0
+        version: 5.9.3
+      vitest:
+        specifier: ^1.2.0
+        version: 1.6.1(@types/node@20.19.39)(@vitest/ui@1.6.1)
+
+  apps/test-app:
+    dependencies:
+      '@pap/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
+      '@pap/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      fastify:
+        specifier: ^4.29.1
+        version: 4.29.1
+      fastify-plugin:
+        specifier: ^4.5.1
+        version: 4.5.1
+      zod:
+        specifier: ^3.22.4
+        version: 3.25.76
+    devDependencies:
+      '@pap/testing':
+        specifier: workspace:*
+        version: link:../../packages/testing
       typescript:
         specifier: ^5.3.0
         version: 5.9.3
@@ -162,10 +196,42 @@ importers:
       mongoose:
         specifier: ^8.3.2
         version: 8.23.0
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
     devDependencies:
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
+      typescript:
+        specifier: ^5.3.0
+        version: 5.9.3
+
+  packages/logger:
+    dependencies:
+      fastify:
+        specifier: ^4.29.1
+        version: 4.29.1
+    devDependencies:
+      typescript:
+        specifier: ^5.3.0
+        version: 5.9.3
+
+  packages/testing:
+    dependencies:
+      '@pap/auth':
+        specifier: workspace:*
+        version: link:../auth
+      '@pap/core':
+        specifier: workspace:*
+        version: link:../core
+      fastify:
+        specifier: ^4.29.1
+        version: 4.29.1
+      mongoose:
+        specifier: ^8.3.2
+        version: 8.23.0
+    devDependencies:
       typescript:
         specifier: ^5.3.0
         version: 5.9.3
